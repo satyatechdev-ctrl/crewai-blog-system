@@ -56,7 +56,7 @@ jobs:
         run: echo "1" | crewai login
 
       - name: Create deployment
-        run: crewai deploy create --name crewai-blog-system
+        run: crewai deploy create
 
       - name: Deploy to CrewAI Cloud
         run: crewai deploy push
