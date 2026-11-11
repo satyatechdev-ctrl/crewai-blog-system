@@ -61,7 +61,7 @@ jobs:
           echo "OPENAI_BASE_URL=https://api.euron.one/api/v1/euri" >> .env
 
       - name: Create deployment
-        run: crewai deploy create --skip-validate
+        run: echo "" | crewai deploy create --skip-validate
 
       - name: Deploy to CrewAI Cloud
         run: crewai deploy push
