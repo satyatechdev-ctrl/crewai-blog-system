@@ -3,7 +3,6 @@
 from typing import Any
 
 from crewai import Agent, Crew, Process, Task
-from crewai.memory import RAGMemory, RecentMemory
 from crewai.project import CrewBase, agent, crew, task
 
 from crewai_blog_system.tools import (
