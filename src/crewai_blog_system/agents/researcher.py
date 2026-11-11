@@ -1,19 +1,18 @@
-"""Researcher agent: gathers information and facts about the topic.
+"""Researcher agent: drafts a research brief from model knowledge.
 
 Role
 ----
 The Researcher is the first agent in the pipeline. It:
 
 1. Accepts a blog post topic from the user.
-2. Uses its internal knowledge and web-search tools to gather:
+2. Uses its available model knowledge and tools to identify:
    - Key concepts and definitions
    - Recent developments and trends
    - Expert opinions and statistics
    - Related technologies and tools
 3. Structures the research into a well-organised brief that the Writer agent can consume.
 
-The Researcher uses short-term memory to remember what it has already found,
-avoiding duplicate searches.
+No live web search is configured; claims and references should be independently verified.
 """
 
 from __future__ import annotations
@@ -31,19 +30,17 @@ def create_researcher() -> Agent:
     return Agent(
         role="Senior Technical Researcher",
         goal=(
-            "Research the given topic thoroughly and produce a comprehensive "
-            "research brief covering key concepts, recent developments, expert "
-            "opinions, statistics, and related technologies. Provide well-structured "
-            "findings that a technical writer can use to create an authoritative blog post."
+            "Draft a research brief covering key concepts and relevant context for "
+            "the given topic. Distinguish established knowledge from uncertain or "
+            "time-sensitive claims, and do not invent citations or statistics."
         ),
         backstory=(
             "You are a senior technical researcher with 15+ years of experience "
             "in technology journalism and analysis. You have deep expertise across "
             "multiple technology domains including AI, cloud computing, cybersecurity, "
-            "and emerging technologies. You excel at finding authoritative sources, "
-            "cross-referencing claims, and synthesising complex information into "
-            "clear, actionable research briefs. You always cite sources and distinguish "
-            "between established facts and emerging trends."
+            "and emerging technologies. You synthesise complex information into "
+            "clear research briefs. You do not have live web access, so never claim "
+            "to have cross-checked a source or invent a citation."
         ),
         tools=[SummarizeTool(), FactCheckerTool()],
         llm=llm,

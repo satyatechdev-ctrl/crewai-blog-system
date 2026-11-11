@@ -17,26 +17,21 @@ def create_research_task(topic: str) -> Task:
     return Task(
         description=(
             f"Research the topic: **{safe_topic}**\n\n"
-            "Gather comprehensive information including:\n"
+            "Cover relevant background including:\n"
             "1. Core concepts and definitions\n"
-            "2. Current state of the field (as of 2026)\n"
-            "3. Key players, companies, and open-source projects\n"
-            "4. Recent breakthroughs and developments\n"
-            "5. Challenges, limitations, and controversies\n"
-            "6. Practical applications and use cases\n"
-            "7. Expert opinions and industry trends\n"
-            "8. Statistics and data points that add credibility\n\n"
+            "2. Established concepts and current limitations\n"
+            "3. Widely known technologies and projects\n"
+            "4. Practical applications and use cases\n"
+            "5. Challenges and limitations\n\n"
             "Structure your research as a well-organised brief with clear sections.\n"
-            "Include any relevant statistics, quotes from experts, and links to "
-            "key resources (where applicable).\n"
-            "Prioritise accuracy over breadth – it is better to have verified "
-            "facts than speculative claims."
+            "Do not invent statistics, expert quotes, or references. Flag "
+            "time-sensitive facts that need independent verification.\n"
+            "Distinguish established concepts from uncertain or time-sensitive claims."
         ),
         expected_output=(
-            "A comprehensive research brief (1500-2500 words) covering the topic "
-            "with clearly organised sections, key facts, statistics, and references. "
-            "The output should be structured as markdown with headings for each major "
-            "area of research."
+            "A structured research brief covering the topic with clear Markdown "
+            "headings. Flag claims that need independent verification, and do not "
+            "include fabricated statistics, expert quotes, or references."
         ),
         agent=None,  # Set by the Crew when tasks are assigned
     )

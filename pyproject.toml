@@ -9,12 +9,8 @@ authors = [
 ]
 dependencies = [
     "crewai>=0.95.0",
-    "crewai-tools>=0.30.0",
     "langchain-openai>=0.3.0",
     "python-dotenv>=1.0.0",
-    "pydantic>=2.0.0",
-    "requests>=2.31.0",
-    "beautifulsoup4>=4.12.0",
 ]
 
 [project.optional-dependencies]
@@ -26,7 +22,11 @@ dev = [
 ]
 
 [project.scripts]
-crewai-blog-system = "crewai_blog_system.main:run"
+crewai-blog-system = "crewai_blog_system.main:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
 [tool.ruff]
 line-length = 120
@@ -40,5 +40,5 @@ ignore = ["S101", "S311"]  # Allow asserts in tests; allow hash usage (not for p
 testpaths = ["tests"]
 
 [tool.hatch.build.targets.wheel]
-packages = ["src"]
+packages = ["src/crewai_blog_system"]
 include = ["src/crewai_blog_system/config/*.yaml"]

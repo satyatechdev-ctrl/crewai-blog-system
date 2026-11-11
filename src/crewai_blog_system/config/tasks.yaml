@@ -4,20 +4,17 @@ research_task:
   agent: researcher
   description: >-
     Research the topic "{topic}" thoroughly.
-    Gather key facts, statistics, expert opinions, recent developments,
-    and relevant references. Focus on technical depth while ensuring
-    accuracy. Cover:
+    Draft a research brief from model knowledge, covering:
     - What the topic is and why it matters
     - Key technical concepts and how they work
-    - Current state of the field (as of 2026)
-    - Expert opinions and industry perspectives
     - Real-world applications and use cases
-    - Future trends and predictions
-    Provide a comprehensive research document with clear sections.
+    - Established trends and possible future directions
+    Do not invent citations, statistics, expert opinions, or claims of live research.
+    Clearly label time-sensitive or uncertain information that needs independent verification.
   expected_output: >-
-    A structured research document (1,500-2,500 words) covering the topic
-    with clear headings, factual data, and references. Organised into logical
-    sections that can be used as the foundation for a blog post.
+    A structured research document covering the topic with clear headings.
+    Mark uncertain or time-sensitive claims for verification and do not include
+    fabricated references.
 
 write_task:
   agent: writer
@@ -40,7 +37,7 @@ edit_task:
   agent: editor
   description: >-
     Review the draft blog post about "{topic}" for:
-    - Factual accuracy (flag any questionable claims)
+    - Claims that appear unsupported or need independent verification
     - Technical correctness
     - Writing quality (grammar, clarity, flow)
     - Structure and formatting
@@ -50,5 +47,5 @@ edit_task:
     Improve any areas that need refinement and return the final polished version.
   expected_output: >-
     A polished, publication-ready blog post in Markdown format.
-    Include a brief editorial summary noting any significant changes made
-    and any remaining concerns.
+    Do not state that claims were independently verified. Flag any remaining
+    concerns that readers should verify.

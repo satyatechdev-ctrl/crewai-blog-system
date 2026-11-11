@@ -24,9 +24,9 @@ class TestSanitizeTopic:
         result = sanitize_topic("AI in Healthcare: A Review")
         assert result == "AI in Healthcare: A Review"
 
-    def test_valid_topic_with_special_chars(self):
+    def test_valid_topic_preserves_special_chars(self):
         result = sanitize_topic("Docker & Kubernetes")
-        assert result == "Docker &amp; Kubernetes"  # & is HTML-escaped
+        assert result == "Docker & Kubernetes"
 
     def test_empty_string_rejected(self):
         with pytest.raises(ValidationError, match="cannot be empty"):
@@ -74,11 +74,9 @@ class TestSanitizeTopic:
         topic = "A" * 200
         assert sanitize_topic(topic) is not None
 
-    def test_html_entities_encoded(self):
-        # Even valid chars get HTML-escaped for downstream safety
+    def test_valid_ampersand_is_preserved(self):
         result = sanitize_topic("A & B")
-        assert "&amp;" in result
-        assert "&" not in result or "&amp;" in result
+        assert result == "A & B"
 
     def test_numbers_and_symbols(self):
         result = sanitize_topic("Python 3.12 Features")

@@ -13,14 +13,19 @@ class TestSummarizeTool:
 
     def test_summarize_normal_text(self):
         tool = SummarizeTool()
-        result = tool._run("This is some test text for summarisation.")
-        assert "SUMMARISE" in result
-        assert "chars" in result
+        result = tool._run("First sentence. Second sentence.")
+        assert result == "- First sentence.\n- Second sentence."
 
     def test_summarize_empty_string(self):
         tool = SummarizeTool()
         result = tool._run("")
         assert "Error" in result
+
+    def test_summarize_limits_output_to_ten_sentences(self):
+        tool = SummarizeTool()
+        text = " ".join(f"Sentence {index}." for index in range(12))
+
+        assert len(tool._run(text).splitlines()) == 10
 
     def test_summarize_none(self):
         tool = SummarizeTool()
@@ -38,7 +43,7 @@ class TestSummarizeTool:
 
     def test_tool_description(self):
         tool = SummarizeTool()
-        assert "summarise" in tool.description.lower()
+        assert "extract" in tool.description.lower()
 
 
 class TestStructureTool:
@@ -47,8 +52,16 @@ class TestStructureTool:
     def test_create_outline(self):
         tool = StructureTool()
         result = tool._run("Quantum Computing", "Research notes go here...")
-        assert "OUTLINE" in result
-        assert "Quantum Computing" in result
+        assert result.startswith("# Quantum Computing\n")
+        assert "## Introduction" in result
+        assert "## Key Takeaways" in result
+
+    def test_outline_uses_research_headings(self):
+        tool = StructureTool()
+        result = tool._run("Quantum Computing", "## Qubits\n## Error Correction")
+
+        assert "## Qubits" in result
+        assert "## Error Correction" in result
 
     def test_missing_topic(self):
         tool = StructureTool()
@@ -75,6 +88,7 @@ class TestFactCheckerTool:
         data = json.loads(result)
         assert data["verdict"] == "NEEDS_REVIEW"
         assert data["claim"] == "Quantum computers use qubits."
+        assert "does not verify" in data["notes"]
 
     def test_fact_check_empty_claim(self):
         tool = FactCheckerTool()
@@ -92,6 +106,7 @@ class TestFactCheckerTool:
         import json
         data = json.loads(result)
         assert data["verdict"] == "NEEDS_REVIEW"
+        assert data["review_context"] == "This is a debated claim."
 
     def test_output_is_valid_json(self):
         """Ensure all outputs are valid JSON (no eval/exec needed to parse)."""

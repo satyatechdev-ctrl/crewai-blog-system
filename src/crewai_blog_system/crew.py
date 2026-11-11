@@ -3,8 +3,10 @@
 from typing import Any
 
 from crewai import LLM, Agent, Crew, Process, Task
-from crewai.project import CrewBase, agent, crew, task
+from crewai.project import CrewBase, agent, before_kickoff, crew, task
 
+from crewai_blog_system.config import get_api_key, get_base_url
+from crewai_blog_system.security import sanitize_topic
 from crewai_blog_system.tools import (
     FactCheckerTool,
     StructureTool,
@@ -19,6 +21,13 @@ class BlogCrew:
     Researcher → Writer → Editor pipeline.
     Config driven from config/agents.yaml and config/tasks.yaml.
     """
+
+    @before_kickoff
+    def validate_inputs(self, inputs: dict[str, Any]) -> dict[str, Any]:
+        """Validate the topic before any agent processes it."""
+        validated_inputs = dict(inputs)
+        validated_inputs["topic"] = sanitize_topic(inputs.get("topic"))
+        return validated_inputs
 
     @agent
     def researcher(self) -> Agent:
@@ -71,27 +80,11 @@ class BlogCrew:
             cache=True,
         )
 
-    # ------------------------------------------------------------------
-    # Helpers (keep env-reading logic for backwards compat)
-    # ------------------------------------------------------------------
-
-    @staticmethod
-    def _get_api_key() -> str:
-        import os
-
-        return os.environ.get("OPENAI_API_KEY", "")
-
-    @staticmethod
-    def _get_base_url() -> str:
-        import os
-
-        return os.environ.get("OPENAI_BASE_URL", "https://api.euron.one/api/v1/euri")
-
     def _get_llm(self) -> LLM:
         return LLM(
             model="openai/euri-reasoning",
-            api_key=self._get_api_key(),
-            base_url=self._get_base_url(),
+            api_key=get_api_key(),
+            base_url=get_base_url(),
         )
 
     def kickoff(self, inputs: dict[str, Any]) -> str:

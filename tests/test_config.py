@@ -6,45 +6,42 @@ loading .env (which is a test fixture concern).
 
 from __future__ import annotations
 
-import os
-from unittest import mock
-
 import pytest
 
+import crewai_blog_system.config as cfg
 
-def test_get_llm_returns_chat_openai():
+
+def test_get_llm_returns_chat_openai(monkeypatch):
     """Verify get_llm returns a ChatOpenAI instance when EURON_API_KEY is set."""
-    with mock.patch.dict(os.environ, {"EURON_API_KEY": "sk-test-key-1234"}, clear=False):
-        # Re-import to pick up the patched env
-        import importlib
+    monkeypatch.setattr(cfg, "load_dotenv", lambda: None)
+    monkeypatch.setenv("EURON_API_KEY", "sk-test-key-1234")
+    monkeypatch.delenv("OPENAI_API_KEY", raising=False)
 
-        import crewai_blog_system.config as cfg
-        importlib.reload(cfg)
-
-        llm = cfg.get_llm(temperature=0.5)
-        assert llm.model_name == cfg.EURON_MODEL
-        assert cfg.EURON_BASE_URL == "https://api.euron.one/api/v1/euri"
+    llm = cfg.get_llm(temperature=0.5)
+    assert llm.model_name == cfg.EURON_MODEL
+    assert cfg.get_base_url() == "https://api.euron.one/api/v1/euri"
 
 
-def test_missing_api_key_raises():
-    """Ensure the module refuses to load without an API key."""
-    env_copy = dict(os.environ)
-    os.environ.pop("EURON_API_KEY", None)
+def test_openai_key_is_accepted_for_compatibility(monkeypatch):
+    monkeypatch.setattr(cfg, "load_dotenv", lambda: None)
+    monkeypatch.delenv("EURON_API_KEY", raising=False)
+    monkeypatch.setenv("OPENAI_API_KEY", "legacy-test-key")
 
-    try:
-        with mock.patch.dict(os.environ, {}, clear=True):
-            with pytest.raises(ValueError, match="EURON_API_KEY"):
-                # Force re-evaluation of the module-level key check
-                import importlib
-
-                import crewai_blog_system.config as cfg
-                importlib.reload(cfg)
-    finally:
-        # Restore env
-        os.environ.update(env_copy)
+    assert cfg.get_api_key() == "legacy-test-key"
 
 
+def test_euron_key_takes_precedence(monkeypatch):
+    monkeypatch.setattr(cfg, "load_dotenv", lambda: None)
+    monkeypatch.setenv("EURON_API_KEY", "euron-test-key")
+    monkeypatch.setenv("OPENAI_API_KEY", "legacy-test-key")
 
-# Note: placeholder key validation happens at module import time.
-# The module-level check runs when the module is first loaded; mocking env vars
-# after import has no effect. Integration tests should verify this end-to-end.
+    assert cfg.get_api_key() == "euron-test-key"
+
+
+def test_missing_api_key_raises(monkeypatch):
+    monkeypatch.setattr(cfg, "load_dotenv", lambda: None)
+    monkeypatch.delenv("EURON_API_KEY", raising=False)
+    monkeypatch.delenv("OPENAI_API_KEY", raising=False)
+
+    with pytest.raises(ValueError, match="EURON_API_KEY"):
+        cfg.get_api_key()

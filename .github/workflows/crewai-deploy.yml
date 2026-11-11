@@ -16,10 +16,26 @@ on:
       - ".crewai/**"
       - ".github/workflows/**"
       - "pyproject.toml"
+      - "uv.lock"
+      - "tests/**"
+      - "README.md"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "src/crewai_blog_system/**"
+      - ".crewai/**"
+      - ".github/workflows/**"
+      - "pyproject.toml"
+      - "uv.lock"
+      - "tests/**"
+      - "README.md"
 
 jobs:
   validate:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v4
       
@@ -27,20 +43,24 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-          
-      - name: Install dependencies
-        run: pip install -e ".[dev]"
-        
+
+      - uses: astral-sh/setup-uv@v6
+
+      - name: Install locked dependencies
+        run: uv sync --locked --extra dev
+
       - name: Run tests
-        run: pytest tests/ -v --cov=src/crewai_blog_system
+        run: uv run --locked pytest tests/ -v --cov=crewai_blog_system
         
       - name: Lint
-        run: ruff check src/crewai_blog_system/ tests/
+        run: uv run --locked ruff check src/crewai_blog_system/ tests/
 
   deploy:
     needs: validate
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v4
 
@@ -49,30 +69,29 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Install dependencies
-        run: pip install -e ".[dev]" crewai-cli
+      - uses: astral-sh/setup-uv@v6
+
+      - name: Install locked dependencies
+        run: uv sync --locked --extra dev
 
       - name: Clean stale build artifacts
         run: find src/ -type d -name '*.egg-info' -prune -exec rm -rf {} +
 
       - name: Login to CrewAI Cloud
-        run: echo "1" | crewai login
-
-      - name: Create .env file
-        run: |
-          echo "OPENAI_API_KEY=${{ secrets.EURON_API_KEY }}" > .env
-          echo "OPENAI_BASE_URL=https://api.euron.one/api/v1/euri" >> .env
+        run: echo "1" | uv run --locked crewai login
 
       - name: Verify deployment structure
+        env:
+          EURON_API_KEY: validation-only
         run: |
           echo "Checking config/ directory..."
           ls -la src/crewai_blog_system/config/
           echo "Checking crew.py for @CrewBase..."
           grep -n '@CrewBase' src/crewai_blog_system/crew.py || { echo "ERROR: @CrewBase not found"; exit 1; }
-          python -c "from crewai_blog_system.crew import build_crew; build_crew()"
+          uv run --locked python -c "from crewai_blog_system.crew import build_crew; build_crew()"
 
       - name: Create deployment
-        run: printf '\n\n' | crewai deploy create
+        run: uv run --locked crewai deploy create --yes
 
       - name: Deploy to CrewAI Cloud
-        run: crewai deploy push
+        run: uv run --locked crewai deploy push

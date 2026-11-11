@@ -1,11 +1,10 @@
-"""Security helpers: input sanitisation, secret shielding, and safe topic validation.
+"""Basic validation for user-supplied blog topics.
 
-All validation is done through typed Pydantic models – never eval/exec.
+This validation limits topic shape; it is not a prompt-injection defense.
 """
 
 from __future__ import annotations
 
-import html
 import re
 from typing import Any
 
@@ -58,8 +57,7 @@ def sanitize_topic(raw: Any) -> str:
             "Only letters, numbers, spaces, and basic punctuation are allowed."
         )
 
-    # HTML-encode to prevent any injection in downstream markdown
-    return html.escape(topic)
+    return topic
 
 
 def shield_secret(secret: str | None, visible_chars: int = 4) -> str:

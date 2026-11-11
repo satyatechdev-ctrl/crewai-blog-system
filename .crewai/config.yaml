@@ -17,9 +17,9 @@ settings:
     config:
       model: "text-embedding-3-small"
   
-  # LLM configuration – uses EURON_API_KEY from secrets
+  # LLM configuration – set EURON_API_KEY in deployment secrets
   llm:
-    model: "euri-auto"
+    model: "euri-reasoning"
   
   # Process type
   process: sequential
@@ -47,20 +47,7 @@ input_schema:
   required:
     - topic
 
-# Output schema
+# The crew returns the final Markdown content as a string.
 output_schema:
-  type: object
-  properties:
-    blog_post:
-      type: string
-      description: "The final Markdown blog post"
-    metadata:
-      type: object
-      properties:
-        topic:
-          type: string
-        generated_at:
-          type: string
-          format: date-time
-        word_count:
-          type: integer
+  type: string
+  description: "The final publication-ready Markdown blog post"

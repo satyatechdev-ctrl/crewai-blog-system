@@ -6,36 +6,38 @@ All tools are safe – no shell commands, no eval/exec, no unsafe deserialisatio
 from __future__ import annotations
 
 import json
-from typing import Optional
+import re
 
 from crewai.tools import BaseTool
 
 
 class SummarizeTool(BaseTool):
-    """Summarise a block of text into key bullet points.
+    """Extract leading sentences from text as bullet points.
 
-    The agent calls this to condense research material.
+    This is an extractive helper, not an LLM-based semantic summarizer.
     """
 
     name: str = "summarize_text"
     description: str = (
-        "Summarise a block of text into 5-10 key bullet points. "
-        "Accepts any text string and returns a concise summary."
+        "Extract up to 10 leading sentences from text as bullet points. "
+        "This is extractive and does not verify facts."
     )
 
     def _run(self, text: str) -> str:
         if not text or not isinstance(text, str):
-            return "Error: No valid text provided to summarise."
-        # Pure in-memory summarisation via truncation + extraction
-        # (The actual summarisation happens at the LLM level; this is a passthrough marker)
-        return f"[SUMMARISE] Text length: {len(text)} chars. Ready for agent summarisation."
+            return "Error: No valid text provided to summarize."
+        sentences = [
+            sentence.strip()
+            for sentence in re.split(r"(?<=[.!?])\s+|\r?\n+", text.strip())
+            if sentence.strip()
+        ]
+        if not sentences:
+            return "Error: No valid text provided to summarize."
+        return "\n".join(f"- {sentence}" for sentence in sentences[:10])
 
 
 class StructureTool(BaseTool):
-    """Outline a blog post structure from research notes.
-
-    Returns a markdown outline with headings and sub-sections.
-    """
+    """Create a Markdown outline using headings from research notes when available."""
 
     name: str = "create_outline"
     description: str = (
@@ -46,33 +48,39 @@ class StructureTool(BaseTool):
     def _run(self, topic: str, research_notes: str) -> str:
         if not topic or not research_notes:
             return "Error: Both topic and research notes are required."
-        return (
-            f"[OUTLINE] Topic: {topic!r}\n"
-            f"Research notes length: {len(research_notes)} chars.\n"
-            "The agent should now create a structured outline."
-        )
+        headings = [
+            re.sub(r"^#{1,6}\s+", "", line).strip()
+            for line in research_notes.splitlines()
+            if re.match(r"^#{1,6}\s+\S", line)
+        ]
+        sections = headings[:8] or [
+            "Introduction",
+            "Core Concepts",
+            "Current Landscape",
+            "Practical Applications",
+            "Challenges and Limitations",
+            "Future Outlook",
+            "Key Takeaways",
+        ]
+        return f"# {topic}\n\n" + "\n".join(f"## {section}" for section in sections)
 
 
 class FactCheckerTool(BaseTool):
-    """Cross-check a claim against a knowledge base (mock for production).
-
-    In a real deployment this would connect to a RAG backend or external API.
-    """
+    """Flag claims for human review; this tool does not independently verify them."""
 
     name: str = "fact_check"
     description: str = (
-        "Verify a factual claim. Accepts a claim string and returns "
-        "a verdict: VERIFIED, UNVERIFIED, or NEEDS_REVIEW."
+        "Flag a factual claim for human review. This tool does not verify claims; "
+        "it returns a NEEDS_REVIEW verdict and any supplied context."
     )
 
-    def _run(self, claim: str, context: Optional[str] = None) -> str:
+    def _run(self, claim: str, context: str | None = None) -> str:
         if not claim or not isinstance(claim, str):
             return "Error: No valid claim provided."
-        # Safe JSON output – no eval/exec
         result = {
             "claim": claim,
             "verdict": "NEEDS_REVIEW",
-            "confidence": 0.5,
-            "notes": "Automated fact check – requires human review in production.",
+            "review_context": context,
+            "notes": "This tool does not verify claims. Check the claim against reliable sources.",
         }
         return json.dumps(result, ensure_ascii=False, indent=2)
