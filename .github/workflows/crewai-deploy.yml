@@ -55,6 +55,11 @@ jobs:
       - name: Login to CrewAI Cloud
         run: echo "1" | crewai login
 
+      - name: Create .env file
+        run: |
+          echo "OPENAI_API_KEY=${{ secrets.EURON_API_KEY }}" > .env
+          echo "OPENAI_BASE_URL=https://api.euron.one/api/v1/euri" >> .env
+
       - name: Create deployment
         run: crewai deploy create --skip-validate
 
