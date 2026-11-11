@@ -41,3 +41,4 @@ testpaths = ["tests"]
 
 [tool.hatch.build.targets.wheel]
 packages = ["src"]
+include = ["src/crewai_blog_system/config/*.yaml"]
