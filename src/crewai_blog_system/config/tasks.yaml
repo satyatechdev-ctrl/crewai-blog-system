@@ -1,9 +1,8 @@
 # Task definitions for the CrewAI Blog System
 
-# ---------------------------------------------------------------------------
-# Task 1 – Research
-# ---------------------------------------------------------------------------
-- description: >-
+research_task:
+  agent: researcher
+  description: >-
     Research the topic "{topic}" thoroughly.
     Gather key facts, statistics, expert opinions, recent developments,
     and relevant references. Focus on technical depth while ensuring
@@ -20,10 +19,9 @@
     with clear headings, factual data, and references. Organised into logical
     sections that can be used as the foundation for a blog post.
 
-# ---------------------------------------------------------------------------
-# Task 2 – Write
-# ---------------------------------------------------------------------------
-- description: >-
+write_task:
+  agent: writer
+  description: >-
     Using the research notes provided by the Researcher, write a
     well-structured technical blog post about "{topic}".
     Structure the post with:
@@ -38,10 +36,9 @@
     structure, headings, code examples, and a clear narrative flow.
     Ready for editorial review.
 
-# ---------------------------------------------------------------------------
-# Task 3 – Edit
-# ---------------------------------------------------------------------------
-- description: >-
+edit_task:
+  agent: editor
+  description: >-
     Review the draft blog post about "{topic}" for:
     - Factual accuracy (flag any questionable claims)
     - Technical correctness

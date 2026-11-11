@@ -49,12 +49,11 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Clean stale build artifacts
-        run: |
-          find src/ -name '*.egg-info' -type d -exec rm -rf {} + 2>/dev/null || true
-
       - name: Install dependencies
         run: pip install -e ".[dev]" crewai-cli
+
+      - name: Clean stale build artifacts
+        run: find src/ -type d -name '*.egg-info' -prune -exec rm -rf {} +
 
       - name: Login to CrewAI Cloud
         run: echo "1" | crewai login
@@ -70,6 +69,7 @@ jobs:
           ls -la src/crewai_blog_system/config/
           echo "Checking crew.py for @CrewBase..."
           grep -n '@CrewBase' src/crewai_blog_system/crew.py || { echo "ERROR: @CrewBase not found"; exit 1; }
+          python -c "from crewai_blog_system.crew import build_crew; build_crew()"
 
       - name: Create deployment
         run: printf '\n\n' | crewai deploy create

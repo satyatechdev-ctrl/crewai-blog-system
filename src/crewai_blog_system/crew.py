@@ -2,13 +2,13 @@
 
 from typing import Any
 
-from crewai import Agent, Crew, Process, Task
+from crewai import LLM, Agent, Crew, Process, Task
 from crewai.project import CrewBase, agent, crew, task
 
 from crewai_blog_system.tools import (
-    get_blog_title,
-    search_tech_news,
-    validate_output,
+    FactCheckerTool,
+    StructureTool,
+    SummarizeTool,
 )
 
 
@@ -23,38 +23,41 @@ class BlogCrew:
     @agent
     def researcher(self) -> Agent:
         return Agent(
-            config=self.agents_config[0],
-            tools=[search_tech_news, validate_output],
+            config=self.agents_config["researcher"],
+            tools=[SummarizeTool(), FactCheckerTool()],
+            llm=self._get_llm(),
             verbose=True,
         )
 
     @agent
     def writer(self) -> Agent:
         return Agent(
-            config=self.agents_config[1],
-            tools=[get_blog_title, validate_output],
+            config=self.agents_config["writer"],
+            tools=[StructureTool()],
+            llm=self._get_llm(),
             verbose=True,
         )
 
     @agent
     def editor(self) -> Agent:
         return Agent(
-            config=self.agents_config[2],
-            tools=[validate_output],
+            config=self.agents_config["editor"],
+            tools=[FactCheckerTool()],
+            llm=self._get_llm(),
             verbose=True,
         )
 
     @task
     def research_task(self) -> Task:
-        return Task(config=self.tasks_config[0])
+        return Task(config=self.tasks_config["research_task"])
 
     @task
     def write_task(self) -> Task:
-        return Task(config=self.tasks_config[1])
+        return Task(config=self.tasks_config["write_task"])
 
     @task
     def edit_task(self) -> Task:
-        return Task(config=self.tasks_config[2])
+        return Task(config=self.tasks_config["edit_task"])
 
     @crew
     def crew(self) -> Crew:
@@ -66,13 +69,6 @@ class BlogCrew:
             verbose=True,
             memory=True,
             cache=True,
-            config={
-                "llm": {
-                    "model": "euri-reasoning",
-                    "api_key": self._get_api_key(),
-                    "base_url": self._get_base_url(),
-                }
-            },
         )
 
     # ------------------------------------------------------------------
@@ -91,7 +87,19 @@ class BlogCrew:
 
         return os.environ.get("OPENAI_BASE_URL", "https://api.euron.one/api/v1/euri")
 
+    def _get_llm(self) -> LLM:
+        return LLM(
+            model="openai/euri-reasoning",
+            api_key=self._get_api_key(),
+            base_url=self._get_base_url(),
+        )
+
     def kickoff(self, inputs: dict[str, Any]) -> str:
         """Run the crew with the given inputs and return the final output."""
         result = self.crew().kickoff(inputs=inputs)
         return result.raw
+
+
+def build_crew() -> Crew:
+    """Build the crew referenced by the CrewAI Cloud entrypoint."""
+    return BlogCrew().crew()
