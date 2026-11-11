@@ -53,7 +53,7 @@ jobs:
         run: pip install -e ".[dev]" crewai-cli
 
       - name: Login to CrewAI Cloud
-        run: crewai login
+        run: echo "1" | crewai login
 
       - name: Deploy to CrewAI Cloud
-        run: echo "1" | crewai deploy
+        run: crewai deploy
