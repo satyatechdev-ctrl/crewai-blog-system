@@ -46,6 +46,5 @@ def create_researcher() -> Agent:
         llm=llm,
         verbose=True,
         allow_delegation=False,
-        memory=True,
         cache=True,
     )

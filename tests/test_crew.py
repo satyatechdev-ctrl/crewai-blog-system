@@ -16,6 +16,7 @@ def test_cloud_entrypoint_builds_configured_crew(monkeypatch):
     assert len(crew.agents) == 3
     assert len(crew.tasks) == 3
     assert all(task.agent is not None for task in crew.tasks)
+    assert crew.memory is False
 
 
 def test_build_crew_reports_missing_api_key(monkeypatch):

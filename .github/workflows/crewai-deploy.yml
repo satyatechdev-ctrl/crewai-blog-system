@@ -77,6 +77,12 @@ jobs:
       - name: Clean stale build artifacts
         run: find src/ -type d -name '*.egg-info' -prune -exec rm -rf {} +
 
+      - name: Run CrewAI pre-deploy validation
+        env:
+          EURON_API_KEY: validation-only
+          OPENAI_API_KEY: validation-only
+        run: uv run --locked crewai deploy validate
+
       - name: Login to CrewAI Cloud
         run: echo "1" | uv run --locked crewai login
 
@@ -91,7 +97,13 @@ jobs:
           uv run --locked python -c "from crewai_blog_system.crew import build_crew; build_crew()"
 
       - name: Create deployment
+        env:
+          EURON_API_KEY: validation-only
+          OPENAI_API_KEY: validation-only
         run: uv run --locked crewai deploy create --yes
 
       - name: Deploy to CrewAI Cloud
+        env:
+          EURON_API_KEY: validation-only
+          OPENAI_API_KEY: validation-only
         run: uv run --locked crewai deploy push

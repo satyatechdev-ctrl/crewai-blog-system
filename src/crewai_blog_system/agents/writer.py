@@ -53,6 +53,5 @@ def create_writer() -> Agent:
         llm=llm,
         verbose=True,
         allow_delegation=False,
-        memory=True,
         cache=True,
     )

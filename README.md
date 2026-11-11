@@ -130,7 +130,7 @@ The application loads `.env` when it first needs configuration and raises a clea
 
 ### `.crewai/config.yaml`
 
-Controls CrewAI Cloud deployment settings (entry point, model, process type, and memory).
+Controls CrewAI Cloud deployment settings (entry point, model, and process type). Crew memory is disabled for compatibility with the current CrewAI Cloud runtime.
 
 ## Testing
 

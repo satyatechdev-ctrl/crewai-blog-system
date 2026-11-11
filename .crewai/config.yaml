@@ -6,17 +6,6 @@ entrypoint: crewai_blog_system.crew:build_crew
 
 # Settings for the CrewAI Cloud runner
 settings:
-  # Memory configuration
-  memory:
-    short_term: true
-    long_term: true
-    entity: true
-  
-  # Embedding configuration for memory
-  embedder:
-    config:
-      model: "text-embedding-3-small"
-  
   # LLM configuration – set EURON_API_KEY in deployment secrets
   llm:
     model: "euri-reasoning"
