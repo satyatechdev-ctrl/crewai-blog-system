@@ -1,0 +1,66 @@
+# CrewAI Cloud Deployment Configuration
+# This file configures how the crew runs on CrewAI Cloud.
+
+# Entry point for CrewAI Cloud – the module:callable to invoke
+entrypoint: crewai_blog_system.crew:build_crew
+
+# Settings for the CrewAI Cloud runner
+settings:
+  # Memory configuration
+  memory:
+    short_term: true
+    long_term: true
+    entity: true
+  
+  # Embedding configuration for memory
+  embedder:
+    config:
+      model: "text-embedding-3-small"
+  
+  # LLM configuration – uses EURON_API_KEY from secrets
+  llm:
+    model: "euri-auto"
+  
+  # Process type
+  process: sequential
+  
+  # Max iterations per agent (prevents runaway loops)
+  max_iter: 25
+  max_rpm: 100  # requests per minute
+  
+  # Cache configuration
+  cache: true
+
+# CrewAI Cloud
+crewai_version: 0.1.0
+organization_id: "9048e27b-8a42-4c06-84fa-cea9685a3502"  # Replace with your CrewAI org ID
+
+# Input schema – CrewAI Cloud will pass these as JSON
+input_schema:
+  type: object
+  properties:
+    topic:
+      type: string
+      description: "The topic for the blog post"
+      minLength: 1
+      maxLength: 200
+  required:
+    - topic
+
+# Output schema
+output_schema:
+  type: object
+  properties:
+    blog_post:
+      type: string
+      description: "The final Markdown blog post"
+    metadata:
+      type: object
+      properties:
+        topic:
+          type: string
+        generated_at:
+          type: string
+          format: date-time
+        word_count:
+          type: integer

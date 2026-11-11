@@ -1,0 +1,53 @@
+name: "CrewAI Blog System"
+
+# CrewAI Cloud pipeline configuration
+# Triggers on push to main branch when files in this repo change
+
+# This configuration tells CrewAI Cloud how to build, test, and deploy the crew.
+# Once you push to GitHub, CrewAI Cloud watches for changes and re-deploys.
+
+on:
+  push:
+    branches:
+      - main
+      - crewai-cloud
+    paths:
+      - "crewai_blog_system/**"
+      - ".crewai/**"
+      - "pyproject.toml"
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          
+      - name: Install dependencies
+        run: pip install -e ".[dev]"
+        
+      - name: Run tests
+        run: pytest tests/ -v --cov=crewai_blog_system
+        
+      - name: Lint
+        run: ruff check crewai_blog_system/ tests/
+
+  deploy:
+    needs: validate
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Install dependencies
+        run: pip install -e ".[dev]" crewai-cli
+
+      - name: Login to CrewAI Cloud
+        run: crewai login
+
+      - name: Deploy to CrewAI Cloud
+        run: crewai deploy
