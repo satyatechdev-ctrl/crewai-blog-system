@@ -21,7 +21,7 @@ from __future__ import annotations
 from crewai import Agent
 
 from crewai_blog_system.config import get_llm
-from crewai_blog_system.tools import SummarizeTool, FactCheckerTool
+from crewai_blog_system.tools import FactCheckerTool, SummarizeTool
 
 
 def create_researcher() -> Agent:

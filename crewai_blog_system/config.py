@@ -9,6 +9,7 @@ import os
 from pathlib import Path
 
 from dotenv import load_dotenv
+from langchain_openai import ChatOpenAI
 
 # ---------------------------------------------------------------------------
 # Load .env (does NOT override already-set env vars – explicit wins)
@@ -44,8 +45,6 @@ CREWAI_API_KEY: str = os.environ.get("CREWAI_API_KEY", "")
 # ---------------------------------------------------------------------------
 # LLM factory – returns the LangChain chat model configured for Euron
 # ---------------------------------------------------------------------------
-
-from langchain_openai import ChatOpenAI
 
 
 def get_llm(temperature: float = 0.4) -> ChatOpenAI:

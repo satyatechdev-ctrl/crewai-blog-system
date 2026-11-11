@@ -14,8 +14,8 @@ from typing import Optional
 
 from crewai import Crew, Process
 
-from crewai_blog_system.agents import create_researcher, create_writer, create_editor
-from crewai_blog_system.tasks import create_research_task, create_writing_task, create_editing_task
+from crewai_blog_system.agents import create_editor, create_researcher, create_writer
+from crewai_blog_system.tasks import create_editing_task, create_research_task, create_writing_task
 
 logger = logging.getLogger("crewai_blog_system.crew")
 

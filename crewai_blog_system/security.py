@@ -5,8 +5,8 @@ All validation is done through typed Pydantic models – never eval/exec.
 
 from __future__ import annotations
 
-import re
 import html
+import re
 from typing import Any
 
 # Characters allowed in a blog topic (letters, numbers, basic punctuation)

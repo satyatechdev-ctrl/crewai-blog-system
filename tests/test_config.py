@@ -7,7 +7,6 @@ loading .env (which is a test fixture concern).
 from __future__ import annotations
 
 import os
-import sys
 from unittest import mock
 
 import pytest
@@ -18,6 +17,7 @@ def test_get_llm_returns_chat_openai():
     with mock.patch.dict(os.environ, {"EURON_API_KEY": "sk-test-key-1234"}, clear=False):
         # Re-import to pick up the patched env
         import importlib
+
         import crewai_blog_system.config as cfg
         importlib.reload(cfg)
 
@@ -36,6 +36,7 @@ def test_missing_api_key_raises():
             with pytest.raises(ValueError, match="EURON_API_KEY"):
                 # Force re-evaluation of the module-level key check
                 import importlib
+
                 import crewai_blog_system.config as cfg
                 importlib.reload(cfg)
     finally:

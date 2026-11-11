@@ -5,9 +5,7 @@ All tests run in-memory without LLM calls or network access.
 
 from __future__ import annotations
 
-import pytest
-
-from crewai_blog_system.tools import SummarizeTool, StructureTool, FactCheckerTool
+from crewai_blog_system.tools import FactCheckerTool, StructureTool, SummarizeTool
 
 
 class TestSummarizeTool:
