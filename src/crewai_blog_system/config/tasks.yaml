@@ -1,0 +1,57 @@
+# Task definitions for the CrewAI Blog System
+
+# ---------------------------------------------------------------------------
+# Task 1 – Research
+# ---------------------------------------------------------------------------
+- description: >-
+    Research the topic "{topic}" thoroughly.
+    Gather key facts, statistics, expert opinions, recent developments,
+    and relevant references. Focus on technical depth while ensuring
+    accuracy. Cover:
+    - What the topic is and why it matters
+    - Key technical concepts and how they work
+    - Current state of the field (as of 2026)
+    - Expert opinions and industry perspectives
+    - Real-world applications and use cases
+    - Future trends and predictions
+    Provide a comprehensive research document with clear sections.
+  expected_output: >-
+    A structured research document (1,500-2,500 words) covering the topic
+    with clear headings, factual data, and references. Organised into logical
+    sections that can be used as the foundation for a blog post.
+
+# ---------------------------------------------------------------------------
+# Task 2 – Write
+# ---------------------------------------------------------------------------
+- description: >-
+    Using the research notes provided by the Researcher, write a
+    well-structured technical blog post about "{topic}".
+    Structure the post with:
+    - A compelling title and introduction
+    - Clear H2/H3 sections
+    - Code examples where relevant (in fenced code blocks)
+    - Practical takeaways and real-world context
+    - A conclusion with actionable insights
+    Make it engaging, informative, and readable for a technical audience.
+  expected_output: >-
+    A complete blog post in Markdown format (2,000-3,000 words) with proper
+    structure, headings, code examples, and a clear narrative flow.
+    Ready for editorial review.
+
+# ---------------------------------------------------------------------------
+# Task 3 – Edit
+# ---------------------------------------------------------------------------
+- description: >-
+    Review the draft blog post about "{topic}" for:
+    - Factual accuracy (flag any questionable claims)
+    - Technical correctness
+    - Writing quality (grammar, clarity, flow)
+    - Structure and formatting
+    - Consistent tone and style
+    - Proper use of headings and formatting
+    - Engaging opening and strong conclusion
+    Improve any areas that need refinement and return the final polished version.
+  expected_output: >-
+    A polished, publication-ready blog post in Markdown format.
+    Include a brief editorial summary noting any significant changes made
+    and any remaining concerns.

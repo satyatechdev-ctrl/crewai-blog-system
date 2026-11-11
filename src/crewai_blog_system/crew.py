@@ -1,112 +1,98 @@
-"""Crew orchestration: assembles agents, tasks, and memory into a Crew.
+"""Blog crew implementation – CrewAI Cloud compatible (@CrewBase)."""
 
-This module builds the Crew object and runs it. It is the main entry point
-for both local execution and CrewAI Cloud deployment.
-"""
+from typing import Any
 
-from __future__ import annotations
+from crewai import Agent, Crew, Process, Task
+from crewai.memory import RAGMemory, RecentMemory
+from crewai.project import CrewBase, agent, crew, task
 
-import json
-import logging
-from datetime import datetime, timezone
-from pathlib import Path
-from typing import Optional
-
-from crewai import Crew, Process
-
-from crewai_blog_system.agents import create_editor, create_researcher, create_writer
-from crewai_blog_system.tasks import create_editing_task, create_research_task, create_writing_task
-
-logger = logging.getLogger("crewai_blog_system.crew")
+from crewai_blog_system.tools import (
+    get_blog_title,
+    search_tech_news,
+    validate_output,
+)
 
 
-def build_crew(topic: str) -> Crew:
-    """Build the three-agent Crew for a given topic.
+@CrewBase
+class BlogCrew:
+    """Multi-agent blog post generation crew.
 
-    All agents share memory (short-term + entity).
-    Process is SEQUENTIAL so each agent receives the output of the previous one.
+    Researcher → Writer → Editor pipeline.
+    Config driven from config/agents.yaml and config/tasks.yaml.
     """
-    researcher = create_researcher()
-    writer = create_writer()
-    editor = create_editor()
 
-    research_task = create_research_task(topic)
-    writing_task = create_writing_task(topic)
-    editing_task = create_editing_task(topic)
+    @agent
+    def researcher(self) -> Agent:
+        return Agent(
+            config=self.agents_config[0],
+            tools=[search_tech_news, validate_output],
+            verbose=True,
+        )
 
-    # Assign agents to tasks
-    research_task.agent = researcher
-    writing_task.agent = writer
-    editing_task.agent = editor
+    @agent
+    def writer(self) -> Agent:
+        return Agent(
+            config=self.agents_config[1],
+            tools=[get_blog_title, validate_output],
+            verbose=True,
+        )
 
-    return Crew(
-        agents=[researcher, writer, editor],
-        tasks=[research_task, writing_task, editing_task],
-        process=Process.sequential,
-        verbose=True,
-        # Memory configuration – both short-term and entity memory enabled
-        memory=True,
-        embedder={
-            "config": {
-                "model": "text-embedding-3-small",
-                "api_key": "",  # Uses EURON_API_KEY from env via langchain-openai
-            }
-        },
-        # Cache LLM responses to avoid redundant calls
-        cache=True,
-    )
+    @agent
+    def editor(self) -> Agent:
+        return Agent(
+            config=self.agents_config[2],
+            tools=[validate_output],
+            verbose=True,
+        )
 
+    @task
+    def research_task(self) -> Task:
+        return Task(config=self.tasks_config[0])
 
-def run_crew(
-    topic: str,
-    output_dir: Optional[str] = None,
-) -> str:
-    """Run the blog-creation crew and return the final Markdown output.
+    @task
+    def write_task(self) -> Task:
+        return Task(config=self.tasks_config[1])
 
-    Parameters
-    ----------
-    topic : str
-        The blog post topic (will be sanitised).
-    output_dir : str, optional
-        Directory to write the output Markdown file. Defaults to ``output/``.
+    @task
+    def edit_task(self) -> Task:
+        return Task(config=self.tasks_config[2])
 
-    Returns
-    -------
-    str
-        The final Markdown content of the blog post.
-    """
-    logger.info("Starting blog post generation for topic: %s", topic)
+    @crew
+    def crew(self) -> Crew:
+        """Create and return the Crew."""
+        return Crew(
+            agents=self.agents,
+            tasks=self.tasks,
+            process=Process.sequential,
+            verbose=True,
+            memory=True,
+            cache=True,
+            config={
+                "llm": {
+                    "model": "euri-reasoning",
+                    "api_key": self._get_api_key(),
+                    "base_url": self._get_base_url(),
+                }
+            },
+        )
 
-    crew = build_crew(topic)
-    result = crew.kickoff()
+    # ------------------------------------------------------------------
+    # Helpers (keep env-reading logic for backwards compat)
+    # ------------------------------------------------------------------
 
-    # Extract the raw Markdown from the Crew result
-    # CrewAI returns a CrewOutput; get the raw string
-    final_md = str(result)
+    @staticmethod
+    def _get_api_key() -> str:
+        import os
 
-    # Write output file
-    if output_dir is None:
-        output_dir = "output"
-    out_path = Path(output_dir)
-    out_path.mkdir(parents=True, exist_ok=True)
+        return os.environ.get("OPENAI_API_KEY", "")
 
-    safe_filename = topic.lower().replace(" ", "-")[:80]
-    timestamp = datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S")
-    md_file = out_path / f"{safe_filename}-{timestamp}.md"
+    @staticmethod
+    def _get_base_url() -> str:
+        import os
 
-    md_file.write_text(final_md, encoding="utf-8")
-    logger.info("Blog post written to %s", md_file)
+        return os.environ.get("OPENAI_BASE_URL", "https://api.euron.one/api/v1/euri")
 
-    # Write a JSON metadata file alongside the Markdown
-    meta = {
-        "topic": topic,
-        "generated_at": datetime.now(timezone.utc).isoformat(),
-        "agents": ["Researcher", "Writer", "Editor"],
-        "process": "sequential",
-        "memory_enabled": True,
-        "output_file": str(md_file),
-    }
-    meta_file = out_path / f"{safe_filename}-{timestamp}.json"
-    meta_file.write_text(json.dumps(meta, indent=2, ensure_ascii=False), encoding="utf-8")
-
-    return final_md
+    def kickoff(self, inputs: dict[str, Any]) -> str:
+        """Run the crew with the given inputs and return the final output."""
+        result = self.crew().kickoff(inputs=inputs)
+        return result.raw
