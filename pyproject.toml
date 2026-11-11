@@ -2,7 +2,7 @@
 name = "crewai-blog-system"
 version = "1.0.0"
 description = "Production-ready CrewAI multi-agent system for automated technical blog post generation"
-requires-python = ">=3.10"
+requires-python = ">=3.10,<3.14"
 license = {text = "MIT"}
 authors = [
     {name = "Euron Student"}
