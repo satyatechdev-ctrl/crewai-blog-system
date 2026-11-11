@@ -55,4 +55,4 @@ jobs:
         run: crewai login
 
       - name: Deploy to CrewAI Cloud
-        run: crewai deploy
+        run: echo "1" | crewai deploy
