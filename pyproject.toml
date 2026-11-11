@@ -40,4 +40,4 @@ ignore = ["S101", "S311"]  # Allow asserts in tests; allow hash usage (not for p
 testpaths = ["tests"]
 
 [tool.hatch.build.targets.wheel]
-packages = ["crewai_blog_system"]
+packages = ["src"]
